@@ -3,6 +3,7 @@ function initGame(){
   //set up event listeners
   uiLoginButton.onclick = logInUser;
   uiCloseBtn.onclick = logOutUser;
+  uiLeaderboardBtn.onclick = toggleLeaderboard;
   window.resize = resizeGame;
 
   //initialize game state
@@ -36,6 +37,10 @@ function logInUser(){
   uiCloseBtn.classList.toggle('visible');
 }
 
+function toggleLeaderboard(){
+  uiLeaderboard.classList.toggle('visible');
+}
+
 //initialize variables
 screenWidth = window.innerWidth;
 screenHeight = window.innerHeight;
@@ -48,5 +53,7 @@ uiLoginButton = document.getElementById("nickname-button");
 uiCloseBtn = document.getElementById("close-cmp");
 uiUsername = document.getElementById("username");
 uiCanvas = document.getElementById("canvas");
+uiLeaderboard = document.getElementById("leaderboard");
+uiLeaderboardBtn = document.getElementById("leaderboard-btn");
 
 initGame();
