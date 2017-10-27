@@ -26,6 +26,7 @@ Session(app)
 from multipong.routes import *
 from multipong.sockets import *
 from multipong.rooms import *
+from multipong.chat import *
 import multipong.game as game
 
 def create_app():
