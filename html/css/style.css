@@ -43,6 +43,7 @@ body{
 .close-cmp span:hover{
     background-color: #fff;
     color: #444;
+    cursor: pointer;
 }
 .username-cmp{
    font: 400 16px/25px sans-serif;
@@ -55,18 +56,22 @@ body{
     padding: 10px;
     color: #fff;
     text-trasform: uppercase;
+    text-align: center;
+    width: 50%;
 }
 .leader-cmp{
     padding: 10px;
-    border-radius: 3px;
-    margin-left: auto;
+    width: 25%;
 }
 .leader-cmp .title-btn{
     display: block;
-    padding: 0 5px;
+    float: right;
+    border-radius: 3px;
     font: 300 16px/25px sans-serif;
     background-color: #444;
     color: #fff;
+    width: 120px;
+    text-align: center;
 }
 .leader-cmp .title-btn:hover{
     color: #444;
@@ -77,19 +82,30 @@ body{
     height: 0;
     overflow: hidden;
     transition: all ease-in-out .5s;
+    background-color: #444;
+    color: #fff;
+    font: 300 16px/20px sans-serif;
+    padding: 0 10px;
+    position: absolute;
+    right: 10px;
+    top: 100%;
 }
-.leader-cmp .leader-wrap .visible{
-    height: 200px;
+.leader-cmp .leader-wrap.visible{
+    height: 230px;
+    padding: 10px;
 }
 .leader-cmp .title{
     display: block;
 }
 .leader-cmp .user{
-    display: block;
+    display: flex;
+    width: 100px;
+    justify-content: space-between;
+    border-bottom: 1px solid #333;
 }
 .login-cmp{
     position: fixed;
-    top: 0;
+    top: 45px;
     left: 0;
     right: 0;
     bottom: 0;
