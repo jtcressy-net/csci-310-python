@@ -5,3 +5,5 @@ pytest-flask
 eventlet
 redis
 walrus
+flask-oauthlib
+pymongo
