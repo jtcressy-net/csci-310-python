@@ -16,9 +16,15 @@ def handle_connect():
     roomjoin()
 
 
+@socketio.on('disconnect')
+def handle_disconnect():
+    roomleave()
+
+
 @socketio.on('gamedata')
 def send_gamedata(action='update'):
     roomid = session.get('room')
+    room = Room.get(id == roomid)
     roomdata = {
         "action": action,
         "id": str(roomid),
@@ -149,5 +155,4 @@ def handle_newplayer(data):
 def user_logout():
     if app.config['DEBUG_MODE']:
         print('EVENT: logout:', session.get('username'), session.sid)
-    roomleave()
-    session.clear()
+    session['username'] = ""
