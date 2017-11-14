@@ -1,0 +1,38 @@
+Concept:
+	The paddle is 100 units long with the center of the paddle == x,0
+	When the ball hits the paddle, at a value from -50 to 50, that pos is var x
+	The function of the curve of the paddle is: F(x)
+	The function of the current ball trajectory is B:
+		written in x,y vector form. [ex. B = -1x + -2y ; ball is move down and left at 			30deg from y-axis]
+	F'(x) is the tangent line at which the ball has struck. This is used to find the line H.
+	H is a line perpindicular to F'(x) where H is G o F'(x).
+	The new B is then found by taking old B and mirroring accross H.
+	
+	Note:
+		A computational error arises when new B has a slope equal to old B.
+		This is due to the equation trying to divide by 0.
+		Therefore, if B == H, then new B == old B with y-vector = -(y-vector), and must be caught
+
+Equations:
+	F(x) = -1/125x^2 + 20
+	F'(x) = -2x/125
+	G(x) = -1/x
+
+	B0 = ball's traj. old
+	B1 = ball's traj. new
+	H = Rotational axis
+	m(var) = slope of B0, B1, or H
+
+	To find mB1:
+		angle o B0 = tan^-1(|yb0|/|xb0|)	
+		angle o H = tan^-1(|yh|/|xh|)
+		angle o B1 = ((a o H)-(a o B0))+(a o H) ---> 2(a o H) - (a o B0)
+		cases of mB1:		
+			a o B1 > 90: mB1 = (x)/cos(a o B0) * sin^-1((a o B1) - 90)
+			a o B1 < 90: mB1 = (x)/cos(a o B0) * sin^-1(a o B1) 
+
+Conclusion:
+	mB1 will give new trajectory as:
+		B1 = mB1x + 1y
+	where if mB1 is negative, when converted to a simplified fraction, y will always be the
+	positive number; in relation to players paddle acting as y = x
