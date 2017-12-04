@@ -1,5 +1,5 @@
 //User Interface Class to controll the user interface elements
-ui = new function(){
+function Ui(){
   //initialize private ui variables
   var loginForm = document.getElementById("login-cmp");
   var loginName = document.getElementById("nickname-input");
@@ -14,8 +14,9 @@ ui = new function(){
   var screenWidth = window.innerWidth;
   var screenHeight = window.innerHeight;
   var screenScale = 1;
+	var padding = 10;
   var context = canvas.getContext("2d");
-  var keytime = new Date();
+	var keys = new Array(256);
 
   this.user = "Not Logged In";
   this.arenaSize = 1000;
@@ -29,7 +30,8 @@ ui = new function(){
     resize();
     window.onresize = resize;
     username.innerHTML = this.user;
-    window.onkeydown = processAppInput;
+    window.onkeydown = keyDownInput;
+		window.onkeyup = keyUpInput;
   }
 
   //Renders components on canvas
@@ -37,20 +39,20 @@ ui = new function(){
     context.clearRect(0, 0, screenWidth, screenHeight);
 		
 		//Draw Table
-		var firstBoundry = 0 * screenScale;
-		var secondBoundry = 999 * screenScale;
-		this.firstPoint = 292 * screenScale;
-		this.secondPoint = 706 * screenScale;
+		var firstBoundry = padding * screenScale;
+		var secondBoundry = (999 + padding) * screenScale;
+		var firstPoint = (292 + padding) * screenScale;
+		var secondPoint = (706 + padding) * screenScale;
 		context.beginPath();
-		context.moveTo(this.firstPoint, firstBoundry);
-		context.lineTo(this.secondPoint, firstBoundry);
-		context.lineTo(secondBoundry, this.firstPoint);
-		context.lineTo(secondBoundry, this.secondPoint);
-		context.lineTo(this.secondPoint, secondBoundry);
-		context.lineTo(this.firstPoint, secondBoundry);
-		context.lineTo(firstBoundry, this.secondPoint);
-		context.lineTo(firstBoundry, this.firstPoint);
-		context.lineTo(this.firstPoint, firstBoundry);
+		context.moveTo(firstPoint, firstBoundry);
+		context.lineTo(secondPoint, firstBoundry);
+		context.lineTo(secondBoundry, firstPoint);
+		context.lineTo(secondBoundry, secondPoint);
+		context.lineTo(secondPoint, secondBoundry);
+		context.lineTo(firstPoint, secondBoundry);
+		context.lineTo(firstBoundry, secondPoint);
+		context.lineTo(firstBoundry, firstPoint);
+		context.lineTo(firstPoint, firstBoundry);
 		context.stroke();
 
     //Draw Balls
@@ -60,6 +62,15 @@ ui = new function(){
     //Drawing the paddle
     player.draw(context);
   }
+
+	this.updateInput = function(elapsedTime){
+		if(keys[65] || keys[87]){
+			player.decrement(elapsedTime);
+		}
+		if(keys[68] || keys[83]){
+			player.increment(elapsedTime);
+		}
+	}
 
   //In the event the user resizes browser
   var resize = function(){
@@ -72,11 +83,11 @@ ui = new function(){
     }
     else{
       if(screenHeight < ui.arenaSize){
-        screenScale = screenHeight / ui.arenaSize;
+        screenScale = screenHeight / (ui.arenaSize + 2 * padding);
       }
     }
-    canvas.setAttribute("width", parseInt(ui.arenaSize * screenScale));
-    canvas.setAttribute("height", parseInt(ui.arenaSize * screenScale));
+    canvas.setAttribute("width", parseInt((ui.arenaSize + 2 * padding) * screenScale));
+    canvas.setAttribute("height", parseInt((ui.arenaSize + 2 * padding) * screenScale));
   }
 
   this.getScreenHeight = function(){
@@ -86,6 +97,10 @@ ui = new function(){
   this.getScreenScale = function(){
     return screenScale;
   }
+
+	this.getPadding = function(){
+		return padding;
+	}
 
   //Toggles a few ui components and updates info
   this.logOutUser = function(){
@@ -103,29 +118,19 @@ ui = new function(){
     closeBtn.classList.toggle('visible');
   }
 
-  var processAppInput = function(event){
-    if(new Date() - keytime > 10){
-      keytime = new Date();
-      //console.log(keytime);
-      //input if user is logged in
-      if(!loginForm.classList.contains("visible")){
-        console.log(event.keyCode);
-        if(event.keyCode == 113)//q
-          app.logOutUser();
-        else if(event.keyCode == 63)//?
-          app.toggleDebugMode();
-        else if(event.keyCode == 65)//a
-          player.moveLeft();
-        else if(event.keyCode == 68)//d
-          player.moveRight();
-      }
-      //input if user is not logged in
-      else{
-        if(event.keyCode == 13)//ENTER
-          app.logInUser();
-      }
-    }
-  }
+  var keyDownInput = function(event){
+		if(!loginForm.classList.contains('visible')){
+			keys[event.keyCode] = true;
+		}
+		else
+			if(event.keyCode == 13)//ENTER
+				app.logInUser();
+	}
+
+	var keyUpInput = function(event){
+		if(!loginForm.classList.contains('visible'))
+			keys[event.keyCode] = false;
+	}
 
   this.setRoom = function(id){
     roomId.innerHTML = '(' + id + ')';

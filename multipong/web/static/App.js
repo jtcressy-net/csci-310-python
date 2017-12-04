@@ -1,5 +1,5 @@
 //App class to control the flow of the game and overall game components
-app = new function(){
+function App(){
   //initialize public variables
   var pongBalls = new Array();
   var debug = false;
@@ -13,6 +13,9 @@ app = new function(){
   var frames = 0;
   var logedIn = false;
 
+	//tables
+	var bounceTable = [[-1, 1], [1, -1], [1, 1], [-1, -1]];
+
   //Initial state of the game... not logged in
   this.init = function(){
     //initialize game state
@@ -23,95 +26,43 @@ app = new function(){
   //The game loop
   var loop = function(){
     getElapsedTime();
+		ui.updateInput(this.elapsedTime);
     for(var a = 0; a < pongBalls.length; a++){
       pongBalls[a].pos.x += pongBalls[a].vec.x * this.elapsedTime;
       pongBalls[a].pos.y += pongBalls[a].vec.y * this.elapsedTime;
 			
 			//are we in range of left walls
 			if(pongBalls[a].pos.x <= 292){
-				console.log('in left range');
 				//did we hit upper left wall
-				if(pongBalls[a].pos.y + pongBalls[a].pos.x <= 292){
-					var x = pongBalls[a].vec.y * -1;
-					pongBalls[a].vec.y = pongBalls[a].vec.x * - 1;
-					pongBalls[a].vec.x = x;
-					wallAudio.play();
-				}
+				if(pongBalls[a].pos.y + pongBalls[a].pos.x <= 292)
+					edgeHit(a, 3);
 				//did we hit lower left wall
-				else if(pongBalls[a].pos.y - pongBalls[a].pos.x >= 706){
-					console.log('hit lower left wall');
-					var x = pongBalls[a].vec.y;
-					pongBalls[a].vec.y = pongBalls[a].vec.x;
-					pongBalls[a].vec.x = x;
-					wallAudio.play();
-				}
+				else if(pongBalls[a].pos.y - pongBalls[a].pos.x >= 706)
+					edgeHit(a, 2);
 				//did we hit middle left wall
-				else if(pongBalls[a].pos.x <= 0){
-					pongBalls[a].vec.x *= -1;
-					wallAudio.play();
-				}
+				else if(pongBalls[a].pos.x <= 0)
+					edgeHit(a, 0);
 			}
 			//are we in range of right walls
 			else if(pongBalls[a].pos.x >= 706){
-				console.log('in right range');
 				//did we hit upper right wall
-				if(pongBalls[a].pos.x - pongBalls[a].pos.y >= 706){
-					console.log('hit upper right wall');
-					var x = pongBalls[a].vec.y;
-					pongBalls[a].vec.y = pongBalls[a].vec.x;
-					pongBalls[a].vec.x = x;
-					wallAudio.play();
-				}
+				if(pongBalls[a].pos.x - pongBalls[a].pos.y >= 706)
+					edgeHit(a, 2);
 				//did we hit lower right wall
-				else if(pongBalls[a].pos.y + pongBalls[a].pos.x >= 1706){
-					console.log('hit lower right wall');
-					var x = pongBalls[a].vec.y * -1;
-					pongBalls[a].vec.y = pongBalls[a].vec.x * - 1;
-					pongBalls[a].vec.x = x;
-					wallAudio.play();
-				}
+				else if(pongBalls[a].pos.y + pongBalls[a].pos.x >= 1706)
+					edgeHit(a, 3);
 				//did we hit middle right wall
-				else if(pongBalls[a].pos.x >= 999){
-					pongBalls[a].vec.x *= -1;
-					wallAudio.play();
-				}
+				else if(pongBalls[a].pos.x >= 999)
+					edgeHit(a, 0);
 			}
 			else{
-				if(pongBalls[a].pos.y <= 0){
-					pongBalls[a].vec.y *= -1;
-					wallAudio.play();
-				}
-				else if(pongBalls[a].pos.y >= 999){
-					pongBalls[a].vec.y *= -1;
-					wallAudio.play();
-				}
+				//did we hit top wall
+				if(pongBalls[a].pos.y <= 0)
+					edgeHit(a, 1);
+				//did we hit bottom wall
+				else if(pongBalls[a].pos.y >= 999)
+					edgeHit(a, 1);
 			}
-      /*if(pongBalls[a].pos.x >= ui.arenaSize || pongBalls[a].pos.x < 0){
-        if(player.hitBall(pongBalls[a].pos.x, pongBalls[a].pos.y)){
-          paddleAudio.play();
-          console.log('hit');
-        }
-        else
-          wallAudio.play();
-        if(pongBalls[a].pos.x >= ui.arenaSize)
-          pongBalls[a].pos.x = ui.arenaSize - 1;
-        if(pongBalls[a].pos.x < 0)
-          pongBalls[a].pos.x = 0;
-        pongBalls[a].vec.x *= -1;
-      }
-      if(pongBalls[a].pos.y >= ui.arenaSize || pongBalls[a].pos.y < 0){
-        if(player.hitBall(pongBalls[a].pos.x, pongBalls[a].pos.y)){
-          paddleAudio.play();
-          console.log('hit');
-        }
-        else
-          wallAudio.play();
-        if(pongBalls[a].pos.y >= ui.arenaSize)
-          pongBalls[a].pos.y = ui.arenaSize - 1;
-        if(pongBalls[a].pos.y < 0)
-          pongBalls[a].pos.y = 0;
-        pongBalls[a].vec.y *= -1;
-      }*/
     }
     evalFps();
     if(logedIn)
@@ -119,6 +70,26 @@ app = new function(){
     ui.updateCanvas(pongBalls);
     LOOP = setTimeout(loop, 10);
   }
+
+	var edgeHit = function(theBall, theEdge){
+    pongBalls[theBall].pos.x -= pongBalls[theBall].vec.x * this.elapsedTime;
+    pongBalls[theBall].pos.y -= pongBalls[theBall].vec.y * this.elapsedTime;
+		
+		//Is the edge a horizontal or vertical one
+		if(theEdge < 2){
+			pongBalls[theBall].vec.x *= bounceTable[theEdge][0];
+			pongBalls[theBall].vec.y *= bounceTable[theEdge][1];
+		}
+		//Is the edge a diagonal
+		else{
+			var vecx = pongBalls[theBall].vec.x;
+			var vecy = pongBalls[theBall].vec.y;
+			pongBalls[theBall].vec.x = vecy * bounceTable[theEdge][0];
+			pongBalls[theBall].vec.y = vecx * bounceTable[theEdge][1];
+		}
+	
+		wallAudio.play();
+	}
 
   //calculte the elapsed time for use in frame independent logic
   var getElapsedTime = function(){
@@ -133,7 +104,7 @@ app = new function(){
     var currentTime = new Date().getTime();
     if(currentTime - frameTime >= 1000){
       frameTime = currentTime;
-      console.log('fps', frames);
+      //console.log('fps', frames);
       frames = 0;
     }
     frames++;
@@ -146,7 +117,7 @@ app = new function(){
     if(currentTime - updateTime >= 1000){
       updateTime = currentTime;
       Client.sendClientUpdate();
-      console.log('client update');
+      //console.log('client update');
     }
   }
 
@@ -230,4 +201,7 @@ app = new function(){
   }
 }
 
+var app = new App();
+var ui = new Ui();
+var player = new Paddle();
 app.init();
