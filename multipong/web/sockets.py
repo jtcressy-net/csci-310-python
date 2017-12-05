@@ -17,7 +17,7 @@ def backgroundThread():
             message = json.loads(message.get('data').decode('utf-8'))
             roomid = message.get('roomid')
             d = message.get('payload')
-            d['action'] = 'cycleUpdate'
+            d['action'] = 'forceUpdate'
             socketio.emit('serverUpdate', d, room=roomid)
             message = p.get_message()
         socketio.sleep(0.05)
