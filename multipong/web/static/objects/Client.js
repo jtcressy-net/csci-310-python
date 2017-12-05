@@ -8,6 +8,7 @@ var Client = new function(){
         socket.on('debug', onDebug);
         socket.on('serverUpdate', onServerUpdate);
         socket.on('latencyHandshake', onLatencyReply);
+				socket.on('loginId', onLoginId);
 
         socket.on('connect', function() {
             console.log("connected");
@@ -43,6 +44,9 @@ var Client = new function(){
         var j = '{"clientTime" : ' + time + '}';
         socket.emit('latencyCheck', j);
     }
+		function onLoginId(data) {
+			app.setMeId(data);
+		}
     function onLatencyReply(resp) {
         app.calcDriftTime(resp.data.clientTime, resp.serverTime);
     }

@@ -17,7 +17,7 @@ def backgroundThread():
             message = json.loads(message.get('data').decode('utf-8'))
             roomid = message.get('roomid')
             d = message.get('payload')
-            d['action'] = 'forceUpdate'
+            d['action'] = 'cycleUpdate'
             socketio.emit('serverUpdate', d, room=roomid)
             message = p.get_message()
         socketio.sleep(0.05)
@@ -170,6 +170,8 @@ def handle_newplayer(data):
         player = Player.new(user=username)
         session['player'] = player.id
 
+        socketio.emit('loginId', str(player.id))
+ 
         roomjoin()
 
         if app.config['DEBUG_MODE']:
@@ -187,5 +189,5 @@ def user_logout():
             print('EVENT: logout:', session.get('username'), session.sid)
 
         player = Player.load(session['player'])
-        player.delete()
+        player.delete() 
         del session['player']
