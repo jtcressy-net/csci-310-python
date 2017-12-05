@@ -35,7 +35,7 @@ function Ui(){
   }
 
   //Renders components on canvas
-  this.updateCanvas = function(pongBalls){
+  this.updateCanvas = function(pongBalls, pongPlayers){
     context.clearRect(0, 0, screenWidth, screenHeight);
 		
 		//Draw Table
@@ -57,18 +57,27 @@ function Ui(){
 
     //Draw Balls
 		for(var a = 0; a < pongBalls.length; a++){
-      context.fillRect(parseInt(pongBalls[a].pos.x) * screenScale, parseInt(pongBalls[a].pos.y) * screenScale, 10, 10);
+      context.beginPath();
+      context.arc(parseInt(pongBalls[a].pos.x) * screenScale,
+                  parseInt(pongBalls[a].pos.y) * screenScale,
+                  5, 0, 2 * Math.PI, false);
+      context.fill();
     }
-    //Drawing the paddle
-    player.draw(context);
+    
+		//Drawing the players
+    for(var a = 0; a < pongPlayers.length; a++)
+			pongPlayers[a].draw(context);
   }
 
 	this.updateInput = function(elapsedTime){
-		if(keys[65] || keys[87]){
-			player.decrement(elapsedTime);
-		}
-		if(keys[68] || keys[83]){
-			player.increment(elapsedTime);
+		if(me){
+			if(keys[65] || keys[87]){
+				me.decrement(elapsedTime);
+			}
+			if(keys[68] || keys[83]){
+				me.increment(elapsedTime);
+			}
+			app.paddlePos = me.paddle.pos;
 		}
 	}
 

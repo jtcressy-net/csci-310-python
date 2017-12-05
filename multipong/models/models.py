@@ -14,8 +14,8 @@ walrus_conn = walrus.Database.from_url(os.environ.get('REDIS_URL'))
 
 DEFAULT_ARENA_SIZE = 8  # Currently using an octogon for the arena
 BALL_TYPES = ["normal"]
-MIN_SPEED = 50
-MAX_SPEED = 150
+MIN_SPEED = 125
+MAX_SPEED = 250
 NULL_UUID = uuid.uuid4()
 BOUNCE_TABLE = [[-1, 1], [1, -1], [1, 1], [-1, -1]]
 
@@ -165,8 +165,7 @@ class Player(walrus.Model):
             username=user,
             score=0,
         )
-        player.paddle['x'] = 500
-        player.paddle['y'] = 500
+        player.paddle['pos'] = .5
         player.paddle['wall'] = wall
 
         player.save()
@@ -178,6 +177,10 @@ class Player(walrus.Model):
         self.save()
         return Player.load(self.id)
 
+    def updatePaddle(self, newPos):
+        self.paddle['pos'] = newPos
+        self.save()
+
     def to_json(self):
         ''' Recursively convert fields to json-friendly output.
 
@@ -187,8 +190,7 @@ class Player(walrus.Model):
           score: int,
           paddle: {
             wall: int,
-               x: float,
-               y: float,
+            pos:  float,
             },
         }
         '''
@@ -197,8 +199,7 @@ class Player(walrus.Model):
                 score=self.score,
                 paddle=dict(
                     wall=as_int(self.paddle['wall']),
-                    x=asFloat(self.paddle['x']),
-                    y=asFloat(self.paddle['y']),
+                    pos=asFloat(self.paddle['pos']),
                     ),
                 )
 

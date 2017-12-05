@@ -20,7 +20,7 @@ def backgroundThread():
             d['action'] = 'forceUpdate'
             socketio.emit('serverUpdate', d, room=roomid)
             message = p.get_message()
-        socketio.sleep(0.1)
+        socketio.sleep(0.05)
 
 
 @socketio.on('connect')
@@ -142,7 +142,7 @@ def latencyHandshake(data):
     '''
     timestamp = dict(
             serverTime=time(),
-            data=data,
+            data=json.loads(data),
             )
     socketio.emit('latencyHandshake', timestamp)
 
@@ -156,6 +156,8 @@ def paddleUpdate(data):
     If action field of the message is set to `paddleHit`, the response
     will show a failure or success.
     '''
+    # player = session.get('player')
+    # player.updatePaddle(newPos)
 
 
 @socketio.on('login')
@@ -168,6 +170,8 @@ def handle_newplayer(data):
         player = Player.new(user=username)
         session['player'] = player.id
 
+        socketio.emit('loginId', str(player.id))
+ 
         roomjoin()
 
         if app.config['DEBUG_MODE']:
@@ -185,5 +189,5 @@ def user_logout():
             print('EVENT: logout:', session.get('username'), session.sid)
 
         player = Player.load(session['player'])
-        player.delete()
+        player.delete() 
         del session['player']

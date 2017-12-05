@@ -2,14 +2,17 @@
 function App(){
   //initialize public variables
   var pongBalls = new Array();
+	var pongPlayers = new Array();
   var debug = false;
   var LOOP = null;
   var paddleAudio = new Audio('static/audio/paddle-hit.wav');
   var wallAudio = new Audio('static/audio/wall-hit.wav');
+  var driftTime = 0.0; // server's time - local time
   var previousTime = new Date().getTime();
   var frameTime = new Date().getTime();
   var updateTime = new Date().getTime();
   this.elapsedTime = 0;
+	var meId = 0;
   var frames = 0;
   var logedIn = false;
 
@@ -65,9 +68,7 @@ function App(){
 			}
     }
     evalFps();
-    if(logedIn)
-      evalClientUpdate();
-    ui.updateCanvas(pongBalls);
+    ui.updateCanvas(pongBalls, pongPlayers);
     LOOP = setTimeout(loop, 10);
   }
 
@@ -149,34 +150,66 @@ function App(){
     return false;
   }
 
+	var havePlayer = function(id){
+		for(var a = 0; a < pongPlayers.length; a++){
+			if(pongPlayers[a].id == id)
+				return true;
+		}
+		return false;
+	}
+
   //function fired on forced serverUpdate action=forceUpdate
   //tells client to reinitialize game data including players, leaderboard and balls
   this.forceUpdate = function(data){
     //Clear current client game state then update
     pongBalls = new Array();
-    this.cycleUpdate(data);
+		pongPlayers = new Array();
+		this.cycleUpdate(data);
   }
 
-  //function fired on normal serverUpdate action=cycleUpdate
+	this.paddlePos = .5;
+	//function fired on normal serverUpdate action=cycleUpdate
   //just to update ball and player paddle positions
   this.cycleUpdate = function(data){
+    var latency = (Date.now() / 1000) - data.timestamp - this.driftTime;
     //update the balls
     for(var a = 0; a < data.balls.length; a++){
       if(!haveBall(data.balls[a].id)){
-        ball = new Ball();
+        var ball = new Ball();
         ball.init(data.balls[a].id, data.balls[a].pos.x, data.balls[a].pos.y, data.balls[a].vec.x, data.balls[a].vec.y, data.balls[a].type);
         pongBalls.push(ball);
       }
       else{
-        ball = getBall(data.balls[a].id);
-        ball.pos.x = data.balls[a].pos.x;
-        ball.pos.y = data.balls[a].pos.y;
+        var ball = getBall(data.balls[a].id);
         ball.vec.x = data.balls[a].vec.x;
         ball.vec.y = data.balls[a].vec.y;
+        ball.pos.x = data.balls[a].pos.x + ball.vec.x * latency;
+        ball.pos.y = data.balls[a].pos.y + ball.vec.y * latency;
       }
     }
 
     //update player paddle positions
+    for(var a = 0; a < data.players.length; a++){
+      if(!havePlayer(data.players[a].id)){
+        var player = new Player();
+				player.init(data.players[a].id, data.players[a].username, data.players[a].paddle.pos, data.players[a].paddle.wall);
+				console.log(pongPlayers.length);
+        pongPlayers.push(player);
+				console.log(pongPlayers.length);
+				if(player.id == meId){
+					me = pongPlayers[pongPlayers.length - 1];
+					me.paddle.pos = this.paddlePos;
+					console.log('me', me.id);
+				}
+      }
+      else{
+        var player = getPlayer(data.players[a].id);
+				if(player != me){
+					console.log('updating paddle position');
+					player.paddle.pos = data.players[a].paddle.pos;
+				}
+      }
+    }
   }
 
   //function fired on socket serverUpdate action=initUpdate
@@ -187,6 +220,11 @@ function App(){
     loop();
   }
 
+  this.calcDriftTime = function(clientTime, serverTime) {
+    var ping = ((Date.now() / 1000) - clientTime) / 2;
+    this.driftTime = serverTime - clientTime - ping;
+  }
+
   var getBall = function(id){
     for(var a = 0; a < pongBalls.length; a++){
       if(pongBalls[a].id == id)
@@ -195,13 +233,25 @@ function App(){
     return false
   }
 
+	var getPlayer = function(id){
+		for(var a = 0; a < pongPlayers.length; a++){
+			if(pongPlayers[a].id == id)
+				return pongPlayers[a];
+		}
+		return false;
+	}
+
   //returns the pongballs for use in JSON packaging in socket io
   this.getBalls = function(){
     return pongBalls;
   }
+
+	this.setMeId = function(id){
+		meId = id;
+	}
 }
 
+var me = null;
 var app = new App();
 var ui = new Ui();
-var player = new Paddle();
 app.init();
