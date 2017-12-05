@@ -70,11 +70,14 @@ function Ui(){
   }
 
 	this.updateInput = function(elapsedTime){
-		if(keys[65] || keys[87]){
-			me.decrement(elapsedTime);
-		}
-		if(keys[68] || keys[83]){
-			me.increment(elapsedTime);
+		if(me){
+			if(keys[65] || keys[87]){
+				me.decrement(elapsedTime);
+			}
+			if(keys[68] || keys[83]){
+				me.increment(elapsedTime);
+			}
+			app.paddlePos = me.paddle.pos;
 		}
 	}
 

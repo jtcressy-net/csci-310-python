@@ -164,10 +164,11 @@ function App(){
     //Clear current client game state then update
     pongBalls = new Array();
 		pongPlayers = new Array();
-    this.cycleUpdate(data);
+		this.cycleUpdate(data);
   }
 
-  //function fired on normal serverUpdate action=cycleUpdate
+	this.paddlePos = .5;
+	//function fired on normal serverUpdate action=cycleUpdate
   //just to update ball and player paddle positions
   this.cycleUpdate = function(data){
     var latency = (Date.now() / 1000) - data.timestamp - this.driftTime;
@@ -197,6 +198,7 @@ function App(){
 				console.log(pongPlayers.length);
 				if(player.id == meId){
 					me = pongPlayers[pongPlayers.length - 1];
+					me.paddle.pos = this.paddlePos;
 					console.log('me', me.id);
 				}
       }
